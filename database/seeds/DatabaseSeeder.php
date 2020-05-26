@@ -1,7 +1,6 @@
 <?php
 
 use Illuminate\Database\Seeder;
-use App\Category;
 use Illuminate\Support\Facades\DB;
 
 class DatabaseSeeder extends Seeder
@@ -13,36 +12,8 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        $threads = [
-           [
-        		 'category_name' => 'Car',
-        		 'parent_id' => '0',
-        		 'is_deleted' => '0'
-        		],
-        		[
-        		 'category_name' => 'Bike',
-        		 'parent_id' => '0',
-        		 'is_deleted' => '0'
-        		],
-        		[
-        		 'category_name' => 'Truck',
-        		 'parent_id' => '0',
-        		 'is_deleted' => '0'
-        		],
-        		[
-        		 'category_name' => 'Bicycle',
-        		 'parent_id' => '0',
-        		 'is_deleted' => '0'
-        		],
-        		[
-        		 'category_name' => 'Auto',
-        		 'parent_id' => '0',
-        		 'is_deleted' => '0'
-        		],
-        ];
- 
-        foreach ($threads as $thread)
-            DB::table('categoryes')->insert($thread);
+         $this->call(CitiesTableSeeder::class);
+
     }
 
 

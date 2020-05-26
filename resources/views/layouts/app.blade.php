@@ -9,7 +9,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}" />
  
 
-    <title>{{ config('app.name', 'OS') }}</title>
+    <title>{{ config('app.name', 'Trentium') }}</title>
 
     <!-- Styles -->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
@@ -41,5 +41,34 @@
 
     <!-- Scripts -->
     <script src="{{ asset('js/app.js') }}"></script>
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.js"></script>
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.min.css" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script>
+
+  <script type="text/javascript">
+
+      $('.itemName').select2({
+        placeholder: 'Select an item', 
+        ajax: {
+          type: "POST",
+          headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'},
+          url: '{{ route('cityList') }}',
+          dataType: 'json',
+          delay: 250,
+          processResults: function (data) {
+            return {
+              results:  $.map(data, function (item) {
+                    return {
+                        text: item.name,
+                        id: item.id
+                    }
+                })
+            };
+          },
+          cache: true
+        }
+      });
+</script>
 </body>
 </html>
