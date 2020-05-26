@@ -18,7 +18,6 @@ Route::get('/','HomeController@index')->name('home');
 /*Address Book route start */
 
 Route::resource('/user','UserController');
-
 Route::post('/user-datatable','UserController@userDatatable')->name('userDatatable');
 Route::post('/city-list','UserController@cityList')->name('cityList');
 
