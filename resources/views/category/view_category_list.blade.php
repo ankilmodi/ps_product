@@ -12,60 +12,30 @@
                 @endif
                 <div class="box">
                     <div class="box-header box-header-title">
-                        <h3 class="box-title">LIST OF Category</h3>
-                        <a href="{{ route('categoryCreate') }}" class="btn btn-default pull-right"><i
-                                    class="fa fa-plus-square"></i> ADD Category</a>
-                    </div>
-            <section class="content">
-            <!-- right column -->
-            <div class="col-md-8 col-md-offset-1">
-              
-                <div class="row">
-                    <div class="box box-info">
-                       <form method="POST" action="" class="form-horizontal form-material m-t-30"  enctype="multipart/form-data" id="search-form">
-                            <div class="box-body">
-                                {{ csrf_field() }}
-                                <div class="form-group">
-                                    <label for="category_name" class="col-sm-4 control-label">Category Name</label>
-                                    <div class="col-sm-5">
-                    <input type="text" class="form-control" id="category_name" name="category_name"
-                                               placeholder="Enter Category Name">
-                                      
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                            <label for="parent_id" class="col-sm-4 control-label">Parent Category Name</label>
-                            <div class="col-sm-5"> 
-                                       <select name="parent_id" id="parent_id" class="form-control" value="">
-                                        <option value="">Select Parent Category</option>
-                                        @foreach ($category as $key=>$value)         
-                                             <option value="{{$key}}">{{$value}}</option>
-                                        @endforeach
-                                       
-                                       </select>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="box-footer">
-                                <button type="reset" id="reset" class="btn btn-default">Clear</button>
-                                <button type="submit" name="submit" class="btn btn-info pull-right">Filter</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </section>
-                    
+                      <h3 class="box-title">LIST OF CATEGORY</h3>
+                    </div>      
+                    <div class="box-header box-header-title">
+                        <a href="{{ route('categoryCreate') }}" class="btn btn-default pull-left"><i
+                                    class="fa fa-plus-square"></i> Add New Category</a>
+                    </div>         
                     <div class="box-body">
-                        <table id="myTable" class="table table-bordered table-striped">
-                            <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Category Name</th>
-                                <th>Parent Category</th>
-                                <th>ACTION</th>
-                            </tr>
-                        </table>
+                        <form id="frm-example" action="/path/to/your/script.php" method="POST">
+                            <div class="dt-buttons">
+                                <p>
+                                    <button class="dt-button buttons-collection buttons-page-length pull-right btn-danger">Delete</button>
+                                </p>      
+                            </div>
+                            <table id="myTable" class="table table-bordered table-striped">
+                                <thead>
+                                <tr>
+                                   <th><input name="select_all" value="1" id="example-select-all" type="checkbox" /></th>
+                                    <th>Category Name</th>
+                                    <th>Category Image</th>   
+                                    <th>Parent Category</th>
+                                    <th>ACTION</th>
+                                </tr>
+                            </table>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -77,8 +47,8 @@
 <script type="text/javascript"> 
         $(document).ready(function() {
 
-    var oTable =    $('#myTable').DataTable({
-               lengthMenu: [[5, 25, 50, -1], [5, 25, 50, "All"]],
+         var oTable = $('#myTable').DataTable({
+                lengthMenu: [[5, 25, 50, -1], [5, 25, 50, "All"]],
                 bFilter: false,
                 processing: true,
                 serverSide: true,
@@ -87,34 +57,79 @@
                     url: "{{ route('categoryDatatable') }}",
                     headers : {'X-CSRF-TOKEN': '{{ csrf_token() }}'},
                     type : "POST",
-                    data: function (d) {
-                        d.category_name = $('input[name=category_name]').val();
-                        d.parent_id = $('select[name=parent_id]').val();                       
-                    }
                 }, 
                 columns: [
-                    {data: 'id', name: 'id'},
+                    {data: 'id' ,name: 'id' },
                     {data: 'category_name', name: 'category_name', orderable: true, searchable: false},
+                    {data: 'category_image', name: 'category_image', orderable: true, searchable: false},       
                     {data: 'parent_id', name: 'parent_id', searchable: false},
                     {data: 'action', name: 'action', orderable: false, searchable: false},
                 ],
                 order: [ 0, "desc" ],
+                'columnDefs': [
+                 {
+                    'targets': 0,
+                    'checkboxes': {
+                       'selectRow': true
+                    }
+                 }
+              ],
+              'select': {
+                 'style': 'multi'
+              },
             });
 
-             $('#search-form').on('submit', function(e) {
-                oTable.draw();
-                e.preventDefault();
-             });
-
-               $('#reset').click( function (e) {     
-                  $('input[name=product_name]').val('');
-                  $('select[name=category_id]').val('');   
-                    oTable.ajax.reload();
-              });
+          
+               // Handle form submission event 
+               $('#frm-example').on('submit', function(e){
+                  var form = this;
+                  var rows_selected = oTable.column(0).checkboxes.selected();   
+                   if(rows_selected.join(",")){
+                    
+                        var list_id = rows_selected.join(",");
+                        
+                        console.log(list_id);
+                                                    
+                        e.preventDefault();
+                        $.ajax({
+                            type : "POST",
+                            url  : "{{ route('categoryDatatableDelete') }}",
+                            headers : {'X-CSRF-TOKEN': '{{ csrf_token() }}'},
+                            data : { multi_select_id : list_id},
+                            success: function(data){
+                                    oTable.ajax.reload();
+                                     toastr["success"](data['message'])                           
+                                    }
+                                });
+                            
+                                } else{
+                                    toastr["info"]("Please select any one required");
+                               }
+                                    
+                          // Iterate over all selected checkboxes
+                          $.each(rows_selected, function(index, rowId){
+                             // Create a hidden element 
+                             $(form).append(
+                                 $('<input>')
+                                    .attr('type', 'hidden')
+                                    .attr('name', 'id[]')
+                                    .val(rowId)
+                             );
+                          });
+                                             
+                          // Output form data to a console     
+                          $('#example-console-rows').text(rows_selected.join(","));
+                          
+                          // Output form data to a console     
+                          $('#example-console-form').text($(form).serialize());
+                           
+                          // Remove added elements
+                          $('input[name="id\[\]"]', form).remove();
+                           
+                          // Prevent actual form submission
+                          e.preventDefault();
+                       });   
         
          }); 
-
-
     </script>
-
 @endsection

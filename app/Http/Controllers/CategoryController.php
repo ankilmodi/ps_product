@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Session\TokenMismatchException;
 use DataTables;
+use Image;
 
 class CategoryController extends Controller
 {
@@ -44,13 +45,28 @@ class CategoryController extends Controller
        
          $this->validate($request, array(
             'category_name' => 'required',
-            'parent_id' => 'required'
+            'parent_id' => 'required',
+            'category_image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ));
+
+
+        $image = $request->file('category_image');
+        $input['imagename'] = time().'.'.$image->extension();
+     
+        $destinationPath = public_path('/category_image');
+        $img = Image::make($image->path());
+        $img->resize(100, 59, function ($constraint) {
+            $constraint->aspectRatio();
+        })->save($destinationPath.'/'.$input['imagename']);
+   
+        $destinationPath = public_path('/category_image');
+        $image->move($destinationPath, $input['imagename']);
+
 
         $category = new Category();
         $category->category_name = $request->category_name;
         $category->parent_id = $request->parent_id;
-        $category->is_deleted = 0;
+        $category->category_image =  $input['imagename'];
         $category->save();
 
          return redirect('/category-list')->with('message', 'Category Added Successfully!');
@@ -95,9 +111,30 @@ class CategoryController extends Controller
             'parent_id' => 'required'
         ));
 
+         
+
+        if(!empty($request->category_image)){
+
+            $image = $request->file('category_image');
+            $input['imagename'] = time().'.'.$image->extension();
+         
+            $destinationPath = public_path('/category_image');
+            $img = Image::make($image->path());
+            $img->resize(100, 59, function ($constraint) {
+                $constraint->aspectRatio();
+            })->save($destinationPath.'/'.$input['imagename']);
+       
+            $destinationPath = public_path('/category_image');
+            $image->move($destinationPath, $input['imagename']);
+        }else{
+             $input['imagename'] = $request['old_image'];
+        }
+
+
             $category = Category::where('id',$id)->first();
             $category->category_name = $request->category_name;
             $category->parent_id = $request->parent_id;
+            $category->category_image =  $input['imagename'];
             $category->save();
 
             return redirect('category-list')->with('message', 'Successfully Category Updated!');
@@ -123,9 +160,8 @@ class CategoryController extends Controller
          
         if ($request->ajax()) {
       
-        $data = Category::select(['id','category_name','parent_id'])->orderBy('id', 'DESC')
+        $data = Category::select(['id','category_name','category_image','parent_id'])->orderBy('id', 'DESC')
         ->where('parent_id','!=','0')
-        ->where('is_deleted','=','0')
         ->with('children')->newQuery();
         
          return Datatables::of($data)
@@ -151,16 +187,35 @@ class CategoryController extends Controller
                  ->editColumn('parent_id', function($row){
                     $parent_id = $row->children[0]->category_name;
                     return $parent_id;
+                })    
+                ->addColumn('category_image', function($row){
+                     $btn = '<img src="'.env('APP_URL').'/category_image/'.$row->category_image.'" alt="Girl in a jacket" width="50" height="60">';
+                    return $btn;
                 })
                 ->addColumn('action', function($row){
                      $btn = '<a href="' . route('categoryEdit', $row->id) .'" class="btn btn-primary btn-flat">EDIT</a>
                      <a href="' . route('categoryDelete', $row->id) .'" class="btn btn-danger btn-flat">DELETE</a>';
                     return $btn;
                 })
-                ->rawColumns(['action'])
+                ->rawColumns(['action','category_image'])
                 ->make(true);
           }
     }
+
+
+     /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int $id
+     * @return \Illuminate\Http\Response
+     */
+    public function categoryDatatableDelete(Request $request)
+    {    
+
+        Category::whereIn('id',[$request->multi_select_id])->delete();
+        return ['success' => true, 'message' => 'Successfully Category Delete !!'];
+    }
+
 
    
 }

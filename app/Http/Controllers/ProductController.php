@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Session\TokenMismatchException;
 use DataTables;
+use Image;
 
 class ProductController extends Controller
 {
@@ -46,22 +47,28 @@ class ProductController extends Controller
          $this->validate($request, array(
             'category_id' => 'required',
             'product_name' => 'required',
-            'price' => 'required|numeric|min:1|max:1000000000',
-            'sort_order' => 'required|numeric|unique:products'
+            'product_image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'product_description'  => 'required',
         ));
 
-       
-        $imageName = time().'.'.request()->product_image->getClientOriginalExtension();
-        request()->product_image->move(public_path('product_image'), $imageName);
+        $image = $request->file('product_image');
+        $input['imagename'] = time().'.'.$image->extension();
+     
+        $destinationPath = public_path('/product_image');
+        $img = Image::make($image->path());
+        $img->resize(100, 59, function ($constraint) {
+            $constraint->aspectRatio();
+        })->save($destinationPath.'/'.$input['imagename']);
+   
+        $destinationPath = public_path('/product_image');
+        $image->move($destinationPath, $input['imagename']);
+
 
         $product = new Product();
         $product->category_id = $request->category_id;
         $product->product_name = $request->product_name;
-        $product->product_image = $imageName;
+        $product->product_image = $input['imagename'];
         $product->product_description = $request->product_description;
-        $product->price = $request->price;
-        $product->sort_order = $request->sort_order;
-        $product->is_deleted = 0;
         $product->save();
 
          return redirect('/product-list')->with('message', 'Product Added Successfully!');
@@ -104,27 +111,33 @@ class ProductController extends Controller
          $this->validate($request, array(
             'category_id' => 'required',
             'product_name' => 'required',
-            'price' => 'required|numeric|min:1|max:1000000000',
-            'sort_order' => 'required|numeric'
+            'product_description'  => 'required',
         ));
 
-         $data = $request->all();
+       
+         if(!empty($request->product_image)){
 
-        if(!empty($data['product_image'])){
-            $imageName = time().'.'.request()->product_image->getClientOriginalExtension();
-        request()->product_image->move(public_path('product_image'), $imageName);
+            $image = $request->file('product_image');
+            $input['imagename'] = time().'.'.$image->extension();
+         
+            $destinationPath = public_path('/product_image');
+            $img = Image::make($image->path());
+            $img->resize(100, 59, function ($constraint) {
+                $constraint->aspectRatio();
+            })->save($destinationPath.'/'.$input['imagename']);
+       
+            $destinationPath = public_path('/product_image');
+            $image->move($destinationPath, $input['imagename']);
         }else{
-            $imageName = $data['old_image'];
+             $input['imagename'] = $request['old_image'];
         }
 
 
         $product = Product::where('id',$id)->first();
         $product->category_id = $request->category_id;
         $product->product_name = $request->product_name;
-        $product->product_image = $imageName;
+        $product->product_image = $input['imagename'];
         $product->product_description = $request->product_description;
-        $product->price = $request->price;
-        $product->sort_order = $request->sort_order;
         $product->save();
 
         return redirect('product-list')->with('message', 'Successfully Product Updated!');
@@ -150,8 +163,9 @@ class ProductController extends Controller
          
         if ($request->ajax()) {
       
-        $data = Product::select(['id','category_id','product_name','price','sort_order'])->orderBy('sort_order', 'ASC')
-        ->where('is_deleted','=','0')->with('Category')->newQuery();
+        $data = Product::select(['id','category_id','product_name','product_image'])
+        ->orderBy('id', 'DESC')
+        ->with('Category')->newQuery();
     
          return Datatables::of($data)
                 ->addIndexColumn()
@@ -183,15 +197,31 @@ class ProductController extends Controller
                     $category_id = $row->Category[0]->category_name;
                     return $category_id;
                 })
+                 ->addColumn('product_image', function($row){
+                     $btn = '<img src="'.env('APP_URL').'/product_image/'.$row->product_image.'" alt="Girl in a jacket" width="50" height="60">';
+                    return $btn;
+                })
                 ->addColumn('action', function($row){
                      $btn = '<a href="' . route('productEdit', $row->id) .'" class="btn btn-primary btn-flat">EDIT</a>
                      <a href="' . route('productDelete', $row->id) .'" class="btn btn-danger btn-flat">DELETE</a>';
                     return $btn;
                 })
-                ->rawColumns(['action'])
+                ->rawColumns(['action','product_image'])
                 ->make(true);
           }
     }
 
+     /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int $id
+     * @return \Illuminate\Http\Response
+     */
+    public function productDatatableDelete(Request $request)
+    {    
+
+        Product::whereIn('id',[$request->multi_select_id])->delete();
+        return ['success' => true, 'message' => 'Successfully Product Delete !!'];
+    }
    
 }

@@ -26,7 +26,7 @@
                         <div class="box-header with-border">
                             <h3 class="box-title">Edit Product</h3>
                         </div>
-                        <form class="form-horizontal" action="{{ route('productUpdate',$product_get->id) }}" method="post" enctype="multipart/form-data" data-parsley-validat >
+                        <form class="form-horizontal" action="{{ route('productUpdate',$product_get->id) }}" method="post" enctype="multipart/form-data" data-parsley-validat id="form-product-edit" >
                             <div class="box-body">
                                 {{ csrf_field() }}
                                
@@ -66,7 +66,7 @@
                                     <label for="product_image" class="col-sm-4 control-label">Product Image</label>
                                     <div class="col-sm-5">
                            
-                            <img id="product_0"  style="width: 31%;height: 5%;" class="form-control" src="{{ env('APP_URL').'/product_image/'.$product_get->product_image }}"  alt="Image not found" />
+                                 <img id="product"  style="width: 31%;height: 5%;" class="form-control" src="{{ env('APP_URL').'/product_image/'.$product_get->product_image }}"  alt="Image not found" />
                              <input type="file" class="form-control"  value="" id="product_image_logo" name="product_image">
                              
                              <input type="hidden" class="form-control"  value="{{ $product_get->product_image }}" name="old_image">
@@ -91,32 +91,6 @@
                                     </div>
                                 </div> 
 
-                                 <div class="form-group{{ $errors->has('price') ? ' has-error' : '' }}">
-                                    <label for="price" class="col-sm-4 control-label">Product Price</label>
-                                    <div class="col-sm-5">
-                            <input type="text" class="form-control" value="{{ $product_get->price }}" id="price" name="price"
-                                               placeholder="Enter Price">
-                                        @if ($errors->has('price'))
-                                            <span class="help-block">
-                                        <strong>{{ $errors->first('price') }}</strong>
-                                    </span>
-                                        @endif
-                                    </div>
-                                </div> 
-
-                                 <div class="form-group{{ $errors->has('sort_order') ? ' has-error' : '' }}">
-                                    <label for="sort_order" class="col-sm-4 control-label">Sort Order</label>
-                                    <div class="col-sm-5">
-                            <input type="text" class="form-control" id="sort_order" value="{{ $product_get->sort_order }}" name="sort_order"
-                                               placeholder="Enter Sort Order Number">
-                                        @if ($errors->has('sort_order'))
-                                            <span class="help-block">
-                                        <strong>{{ $errors->first('sort_order') }}</strong>
-                                    </span>
-                                        @endif
-                                    </div>
-                                </div> 
-
                             <div class="box-footer">
                                 <button type="reset" class="btn btn-default">Clear</button>
                                 <button type="submit" name="submit" class="btn btn-info pull-right">Update</button>
@@ -128,30 +102,48 @@
         </section>
     </div>
 @include('include.footer')
-   <script type="text/javascript"> 
 
-        function readURL_0(input) {
-
-            console.log(input);
-            if (input.files && input.files[0]) {
-                var reader0 = new FileReader();
-
-                reader0.onload = function (e) {
-                    $('#product_0').attr('src', e.target.result);
-                }
-
-                reader0.readAsDataURL(input.files[0]);
-            }
-            else{
-                $('#product_0').attr('src', $('#product_image_0').val());
-            }
-
+<script type="text/javascript"> 
+$(document).ready(function () {
+    $('#form-product-edit').validate({
+        rules: {
+            category_id: {
+                required: true
+            },
+            product_name: {
+                required: true
+            },
+            product_description: {
+                required: true
+            },
+        },
+        messages: {
+            category_id: "Enter your category name",
+            product_name: "Enter your product category",
+            product_description: "Enter your product description",
         }
+    });
+});
 
-        $("#product_image_logo").change(function(){
-            readURL_0(this);
-        });
+function readURL_0(input) {
 
-    </script>     
+    console.log(input);
+    if (input.files && input.files[0]) {
+        var reader0 = new FileReader();
+        reader0.onload = function (e) {
+            $('#product').attr('src', e.target.result);
+        }
+        reader0.readAsDataURL(input.files[0]);
+    }
+    else{
+        $('#product').attr('src', $('#product_image').val());
+    }
+}
+
+$("#product_image_logo").change(function(){
+    readURL_0(this);
+});
+
+</script>     
 
 @endsection

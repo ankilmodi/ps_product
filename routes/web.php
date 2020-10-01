@@ -23,6 +23,8 @@ Route::post('/category-datatable', 'CategoryController@categoryDatatable')->name
 Route::get('/category-edit/{id}','CategoryController@edit')->name('categoryEdit');
 Route::post('/category-update/{id}','CategoryController@update')->name('categoryUpdate');
 Route::get('/category-delete/{id}','CategoryController@destroy')->name('categoryDelete');
+Route::post('/category-datatable-delete','CategoryController@categoryDatatableDelete')->name('categoryDatatableDelete');
+
 
 /*Categaory Route End */
 
@@ -35,21 +37,11 @@ Route::post('/product-datatable', 'ProductController@productDatatable')->name('p
 Route::get('/product-edit/{id}','ProductController@edit')->name('productEdit');
 Route::post('/product-update/{id}','ProductController@update')->name('productUpdate');
 Route::get('/product-delete/{id}','ProductController@destroy')->name('productDelete');
+Route::post('/product-datatable-delete','ProductController@productDatatableDelete')->name('productDatatableDelete');
+
 
 /*Product Route End */
 
-/*Report 1 Route Start */
 
-Route::get('/report-product-count','ReportController@index')->name('reportProductCount');
-Route::post('/report-product-coun-datatable','ReportController@reportProductCountDatatable')->name('reportProductCountDatatable');
-
-/*Report 1 Route End */
-
-/*Report 2 Route Start */
-
-Route::get('/report-product-max-price','ReportController@indexMaxPrice')->name('reportProductMaxPrice');
-Route::post('/report-product-max-price-datatable','ReportController@reportProductMaxPriceDatatable')->name('reportProductMaxPriceDatatable');
-
-/*Report 2 Route End */
 
 

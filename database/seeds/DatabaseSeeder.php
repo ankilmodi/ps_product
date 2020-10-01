@@ -17,27 +17,22 @@ class DatabaseSeeder extends Seeder
            [
         		 'category_name' => 'Car',
         		 'parent_id' => '0',
-        		 'is_deleted' => '0'
         		],
         		[
         		 'category_name' => 'Bike',
         		 'parent_id' => '0',
-        		 'is_deleted' => '0'
         		],
         		[
         		 'category_name' => 'Truck',
         		 'parent_id' => '0',
-        		 'is_deleted' => '0'
         		],
         		[
         		 'category_name' => 'Bicycle',
         		 'parent_id' => '0',
-        		 'is_deleted' => '0'
         		],
         		[
         		 'category_name' => 'Auto',
         		 'parent_id' => '0',
-        		 'is_deleted' => '0'
         		],
         ];
  

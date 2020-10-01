@@ -6,7 +6,7 @@
         <!-- mini logo for sidebar mini 50x50 pixels -->
         <span class="logo-mini"><b>O</b>S</span>
         <!-- logo for regular state and mobile devices -->
-        <span class="logo-lg"><b>PS</b>Product</span>
+        <span class="logo-lg"><b>Silver</b>Touch</span>
     </a>
 
     <!-- Header Navbar: style can be found in header.less -->
